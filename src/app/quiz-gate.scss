@@ -96,6 +96,51 @@ h1 {
   color: #f85149;
 }
 
+.feedback.ok {
+  color: #3fb950;
+}
+
+.gate.solved {
+  animation: gate-out 0.5s ease 0.9s forwards;
+}
+
+@keyframes gate-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.confetti-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetto {
+  position: absolute;
+  top: -8vh;
+  will-change: transform, opacity;
+  animation-name: confetti-fall;
+  animation-timing-function: cubic-bezier(0.3, 0.6, 0.5, 1);
+  animation-fill-mode: forwards;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translate(0, 0) rotate(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--drift), 115vh) rotate(var(--rotate));
+    opacity: 0;
+  }
+}
+
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-6px); }

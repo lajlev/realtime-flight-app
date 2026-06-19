@@ -72,14 +72,15 @@ export class OpenSkyService {
    * OpenSky's CORS header only allows its own origin, so the browser cannot call
    * it directly. In dev we route through the Angular dev-server proxy
    * (see proxy.conf.json); in a static production build (e.g. GitHub Pages,
-   * where no proxy exists) we route through a public CORS proxy.
+   * where no proxy exists) we route through corsproxy.io, whose free tier allows
+   * browser requests from `github.io` (and localhost) origins.
    */
   private endpoint(query: string): string {
     if (isDevMode()) {
       return `/api/states/all?${query}`;
     }
     const target = `https://opensky-network.org/api/states/all?${query}`;
-    return `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`;
+    return `https://corsproxy.io/?url=${encodeURIComponent(target)}`;
   }
 }
 
