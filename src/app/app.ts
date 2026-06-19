@@ -38,6 +38,7 @@ export class App implements AfterViewInit, OnDestroy {
   private readonly mapEl = viewChild.required<ElementRef<HTMLElement>>('map');
 
   protected readonly unlocked = signal(false);
+  protected readonly selectedId = signal<string | null>(null);
   protected readonly flights = signal<Flight[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
@@ -121,15 +122,28 @@ export class App implements AfterViewInit, OnDestroy {
 
   private renderMarkers(flights: Flight[]): void {
     this.markerLayer.clearLayers();
+    const selected = this.selectedId();
     for (const f of flights) {
-      L.marker([f.lat, f.lon], { icon: planeIcon(f.heading ?? 0) })
+      const isSelected = f.icao24 === selected;
+      if (isSelected) {
+        // Pulsing halo under the selected aircraft.
+        L.marker([f.lat, f.lon], { icon: haloIcon(), interactive: false }).addTo(
+          this.markerLayer,
+        );
+      }
+      L.marker([f.lat, f.lon], {
+        icon: planeIcon(f.heading ?? 0, isSelected),
+        zIndexOffset: isSelected ? 1000 : 0,
+      })
         .addTo(this.markerLayer)
-        .bindTooltip(this.tooltip(f));
+        .bindTooltip(this.tooltip(f), isSelected ? { permanent: true } : {});
     }
   }
 
   protected focus(f: Flight): void {
+    this.selectedId.set(f.icao24);
     this.map.setView([f.lat, f.lon], 10, { animate: true });
+    this.renderMarkers(this.flights());
   }
 
   private tooltip(f: Flight): string {
@@ -139,17 +153,29 @@ export class App implements AfterViewInit, OnDestroy {
 }
 
 /** Inline SVG plane rotated to the aircraft's heading. */
-function planeIcon(heading: number): L.DivIcon {
+function planeIcon(heading: number, selected = false): L.DivIcon {
+  const size = selected ? 40 : 26;
+  const fill = selected ? '#ffd54f' : '#e6edf3';
   const svg = `
-    <svg viewBox="0 0 24 24" width="26" height="26"
+    <svg viewBox="0 0 24 24" width="${size}" height="${size}"
          style="transform: rotate(${heading}deg); transform-origin: 50% 50%;">
-      <path fill="#e6edf3" stroke="#0d1117" stroke-width="0.8"
+      <path fill="${fill}" stroke="#0d1117" stroke-width="0.8"
         d="M12 2 13 9 22 13 22 15 13 13 13 19 16 21 16 22 12 21 8 22 8 21 11 19 11 13 2 15 2 13 11 9Z"/>
     </svg>`;
   return L.divIcon({
     html: svg,
-    className: 'plane-icon',
-    iconSize: [26, 26],
-    iconAnchor: [13, 13],
+    className: selected ? 'plane-icon selected' : 'plane-icon',
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
+}
+
+/** Pulsing halo ring drawn beneath the selected aircraft. */
+function haloIcon(): L.DivIcon {
+  return L.divIcon({
+    html: '<span class="halo"></span>',
+    className: 'halo-icon',
+    iconSize: [64, 64],
+    iconAnchor: [32, 32],
   });
 }

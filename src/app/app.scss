@@ -64,9 +64,45 @@
   }
 }
 
-:host ::ng-deep .plane-icon {
+:host ::ng-deep .plane-icon,
+:host ::ng-deep .halo-icon {
   background: transparent;
   border: none;
+}
+
+:host ::ng-deep .plane-icon.selected svg {
+  filter: drop-shadow(0 0 6px #ffd54f) drop-shadow(0 0 12px rgba(255, 213, 79, 0.6));
+}
+
+:host ::ng-deep .halo-icon .halo {
+  display: block;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid #ffd54f;
+  background: rgba(255, 213, 79, 0.15);
+  animation: halo-pulse 1.6s ease-out infinite;
+}
+
+@keyframes halo-pulse {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+// Highlighted (selected) flight in the sidebar list.
+:host ::ng-deep mat-nav-list a.active {
+  background: #15233a;
+  box-shadow: inset 3px 0 0 #ffd54f;
+
+  [matListItemTitle] {
+    color: #ffd54f;
+  }
 }
 
 // Leaflet popups/tooltips + controls tuned for the dark basemap.

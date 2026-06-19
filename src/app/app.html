@@ -30,7 +30,7 @@
     }
     <mat-nav-list>
       @for (f of flights(); track f.icao24) {
-        <a mat-list-item (click)="focus(f)">
+        <a mat-list-item (click)="focus(f)" [class.active]="f.icao24 === selectedId()">
           <mat-icon matListItemIcon>flight</mat-icon>
           <span matListItemTitle>{{ f.callsign }}</span>
           <span matListItemLine>
