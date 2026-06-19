@@ -1,0 +1,49 @@
+@if (!unlocked()) {
+  <app-quiz-gate (unlocked)="onUnlocked()" />
+}
+
+<mat-toolbar class="app-bar">
+  <mat-icon class="logo">flight</mat-icon>
+  <span class="title">Planes around Billund</span>
+  <span class="spacer"></span>
+  <span class="meta">
+    {{ flights().length }} within {{ radiusKm }} km
+    @if (lastUpdated(); as t) {
+      · updated {{ t | date: 'HH:mm:ss' }}
+    }
+  </span>
+</mat-toolbar>
+
+@if (loading()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+@if (error(); as e) {
+  <div class="banner error">{{ e }}</div>
+}
+
+<div class="layout">
+  <div #map class="map"></div>
+
+  <aside class="sidebar">
+    @if (flights().length === 0 && !loading()) {
+      <p class="empty">No aircraft currently in range.</p>
+    }
+    <mat-nav-list>
+      @for (f of flights(); track f.icao24) {
+        <a mat-list-item (click)="focus(f)">
+          <mat-icon matListItemIcon>flight</mat-icon>
+          <span matListItemTitle>{{ f.callsign }}</span>
+          <span matListItemLine>
+            {{ f.originCountry }} · {{ f.distanceKm | number: '1.0-0' }} km
+            @if (f.altitude != null) {
+              · {{ f.altitude | number: '1.0-0' }} m
+            }
+            @if (f.onGround) {
+              · on ground
+            }
+          </span>
+        </a>
+      }
+    </mat-nav-list>
+  </aside>
+</div>
